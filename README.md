@@ -1,5 +1,18 @@
-jQuery Multiselect is a lightweight autocomplete plugin that will work
+# jQuery Multiselect
+
+A lightweight and flexible autocomplete plugin that will work
 with any backend, including Backbone.js.
+
+## $(input).multiselect(options)
+
+The multiselect function accepts an options object.
+
+* `source`        - Array of data
+* `get`           - Takes a callback with a single parameter `id` and returns the item from the array that matches that id
+* `id`            - Takes a callback with a single parameter `value` and returns the id for that value in the array
+* `label`         - Takes a callback wtih a single parameter `value` and returns the label that will be shown in the dropdown when an item matches the query
+* `filter`        - Takes a callback with two parameters `value` and `query`, and returns the value if it matches the query.
+* `select`        - Takes a callback with a single parameter `value`.
 
 ## Backbone Example
 
