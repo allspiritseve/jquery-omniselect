@@ -1,9 +1,9 @@
-# jQuery Multiselect
+# jQuery Omniselect
 
 A lightweight and flexible autocomplete plugin that will work
-with any backend, including Backbone.js.
+with any backend, including Backbone.js and Ember.js.
 
-## $(input).multiselect(options)
+## $(input).omniselect(options)
 
 The multiselect function accepts an options object.
 
