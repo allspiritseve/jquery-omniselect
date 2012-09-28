@@ -21,7 +21,7 @@ artists = new TownStage.ArtistsCollection()
 artists.fetch()
 
 $(document).ready ->
-  $('#add_artist').multiselect
+  $('#add_artist').omniselect
     source: -> artists
     get: (id) -> artists.get(id)
     id: (artist) -> artist.get('id')

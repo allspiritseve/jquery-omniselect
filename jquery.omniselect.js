@@ -1,10 +1,10 @@
 (function($) {
 
-  $.multiselect = function(input, options) {
+  $.omniselect = function(input, options) {
     var plugin = this, $input = $(input), settings,
     defaults = {
       render: function(id,label,index) {
-        return $('<li>').attr('data-multiselect-id',id).append(label);
+        return $('<li>').attr('data-omniselect-id',id).append(label);
       },
       numResults: 10,
       allowAdd: true,
@@ -16,28 +16,28 @@
       plugin.settings = settings = $.extend({}, defaults, options);
       $input.attr('autocomplete','off');
       $list = plugin.getResultsWrapper();
-      $list.addClass('multiselect-results');
-      $input.on('focus.multiselect', function(e) {
-        $list.one('click.multiselect','li', function(e) {
-          $list.unbind('blur.multiselect');
-          plugin.select($(this).data('multiselect-id')).reset();
+      $list.addClass('omniselect-results');
+      $input.on('focus.omniselect', function(e) {
+        $list.one('click.omniselect','li', function(e) {
+          $list.unbind('blur.omniselect');
+          plugin.select($(this).data('omniselect-id')).reset();
         });
-        $input.one('blur.multiselect', function(e) {
+        $input.one('blur.omniselect', function(e) {
           setTimeout(plugin.blur,100);
         });
-        $input.on('keydown.multiselect', function(e) {
+        $input.on('keydown.omniselect', function(e) {
           return plugin.keydown(e);
         });
-        $input.on('keyup.multiselect', function(e) {
+        $input.on('keyup.omniselect', function(e) {
           return plugin.keyup(e);
         });
       });
     };
 
     plugin.keydown = function(e) {
-      $input.off('keydown.multiselect');
+      $input.off('keydown.omniselect');
       setTimeout(function() {
-        $input.on('keydown.multiselect', function(e) {
+        $input.on('keydown.omniselect', function(e) {
           return plugin.keydown(e);
         });
       },100);
@@ -48,7 +48,7 @@
       if (e.keyCode == 13 || e.keyCode == 9) {
         selected = $list.children('li.selected')
         if (selected.length != 0) {
-          plugin.select(selected.data('multiselect-id'));
+          plugin.select(selected.data('omniselect-id'));
         }
         if (e.keyCode == 13) {
           return plugin.reset();
@@ -62,7 +62,7 @@
         if ($selected[0] != $list.children('li:last')[0]) {
           $next = $selected.removeClass('selected').next('li')
           $next.addClass('selected');
-          // $input.val(settings.value($next.data('multiselect-id')));
+          // $input.val(settings.value($next.data('omniselect-id')));
         }
         return false;
       }
@@ -73,7 +73,7 @@
           $selected.removeClass('selected');
           $prev = $selected.prev('li');
           $prev.addClass('selected');
-          // $input.val(settings.value($prev.data('multiselect-id')));
+          // $input.val(settings.value($prev.data('omniselect-id')));
         }
         return false;
       }
@@ -83,7 +83,7 @@
       if ($.inArray(e.keyCode,[9,13,27,38,40]) != -1) {
         return false;
       }
-      var $list = $('.multiselect-results');
+      var $list = $('.omniselect-results');
       if ($input.val().length == 0) {
         $list.empty();
         return false;
@@ -99,14 +99,14 @@
       });
 
       if (settings.allowAdd && $.inArray($input.val(),matches) == -1) {
-        $list.append(settings.render('multiselect-new-id','Add artist: ' + $input.val(), -1));
+        $list.append(settings.render('omniselect-new-id','Add artist: ' + $input.val(), -1));
       }
       $list.children('li:first').addClass('selected');
       return false;
     }
 
     plugin.select = function(selected_id) {
-      if (selected_id == 'multiselect-new-id') {
+      if (selected_id == 'omniselect-new-id') {
         settings.add($input.val());
       } else {
         settings.select(settings.get(selected_id))
@@ -124,7 +124,7 @@
 
     plugin.blur = function() {
       plugin.reset();
-      $input.blur().off('keydown.multiselect keyup.multiselect');
+      $input.blur().off('keydown.omniselect keyup.omniselect');
       return false;
     }
 
@@ -137,7 +137,7 @@
       } else {
         $list = $('<ul>').insertAfter($input);
       }
-      $list.addClass('multiselect-results');
+      $list.addClass('omniselect-results');
       return $list;
     }
 
@@ -150,11 +150,11 @@
     plugin.init();
   };
 
-  $.fn.multiselect = function(options) {
+  $.fn.omniselect = function(options) {
     return this.each(function() {
-      if (undefined == $(this).data('multiselect')) {
-        var plugin = new $.multiselect(this,options);
-        $(this).data('multiselect',plugin);
+      if (undefined == $(this).data('omniselect')) {
+        var plugin = new $.omniselect(this,options);
+        $(this).data('omniselect',plugin);
       }
     });
   }
