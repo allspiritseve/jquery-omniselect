@@ -1,0 +1,2 @@
+auto: true
+exclude: Gemfile*, config.rb, Rakefile
