@@ -6,6 +6,9 @@
       render: function(id,label,index) {
         return $('<li>').attr('data-omniselect-id',id).append(label);
       },
+      addLabel: function(query) {
+        return 'Add ' + query;
+      },
       numResults: 10,
       allowAdd: true,
       clearOnReset: false
@@ -99,7 +102,7 @@
       });
 
       if (settings.allowAdd && $.inArray($input.val(),matches) == -1) {
-        $list.append(settings.render('omniselect-new-id','Add artist: ' + $input.val(), -1));
+        $list.append(settings.render('omniselect-new-id', settings.addLabel($input.val()), -1));
       }
       $list.children('li:first').addClass('selected');
       return false;
