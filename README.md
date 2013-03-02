@@ -8,6 +8,10 @@ with any backend, including Backbone and Ember.
 The omniselect function accepts an options object.
 
 * `source` - Array of data or a callback
+* `numResults` - Integer, maximum number of results to be displayed.
+* `allowAdd` - Boolean, enables a separate result for selecting the currently selected text. When the result is selected, the `omniselect:add` event is fired.
+* `resultsClass` - String containing one or more classes to be applied to the results list element, delimited by a space (E.g. "class-one class-two").
+* `activeClass` - Sring containing one or more classes to be applied to the active result element, delimited by a space.
 * `filter` - Takes a callback with two parameters `item` and `query`. Should return a truthy value if the item matches the query.
 * `itemId` - Takes a callback with a single parameter `item`. Should return a unique identifier for that value in the array.
 * `itemLabel` - Takes a callback wtih a single parameter `item`. Should return the label that is displayed in the list of results.
@@ -35,6 +39,34 @@ $(document).ready(function() {
   });
 });
 ```
+
+## Twitter Bootstrap example (Replaces Typeahead)
+
+```javascript
+$(document).ready(function() {
+  var $input = $('#states');
+
+  $input.omniselect({
+    source: ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Dakota","North Carolina","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"],
+    resultsClass: 'typeahead dropdown-menu',
+    activeClass: 'active',
+    renderItem: function(label, id, index) {
+      return '<li><a href="#">' + label + '</a></li>';
+    }
+  });
+  
+  $input.on('omniselect:select', function(event, value) {
+    console.log('Selected: ' + value);
+  });
+});
+```
+
+```html
+<div class="dropdown">
+  <input type="text" name="search" class="span3" id="states" style="margin: 0" placeholder="Search here..." />
+</div>
+```
+
 
 ## Backbone example
 
