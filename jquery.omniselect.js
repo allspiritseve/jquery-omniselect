@@ -6,8 +6,8 @@
     
     var defaults = {
       source: [],
-      results: '<ul class="omniselect-results"></ul>',
-      item: '<li class="omniselect-item"></li>',
+      resultsClass: 'omniselect-results',
+      activeClass: 'omniselect-active',
       numResults: 10,
       allowAdd: false
     };
@@ -15,13 +15,8 @@
     var plugin = {},
       $input = $(spec.input),
       options = $.extend({}, defaults, spec.options),
-      renderItem = options.renderItem || renderItem,
-      filter = options.filter || filter,
-      itemId = options.itemId || itemId,
-      itemLabel = options.itemLabel || itemLabel,
-      itemValue = options.itemValue || itemValue,
-      addLabel = options.addLabel || addLabel,
-      $results = $(options.results),
+      $results = $('<ul></ul>').addClass(options.resultsClass),
+      activeClassSelector = '.' + options.activeClass.split(' ').join('.'),
       focused, visible, mouseover, suppressKeyPressRepeat;
 
     var listen = function() {
@@ -75,23 +70,23 @@
     };
 
     var previous = function() {
-      var $current = $results.children('.omniselect-active'),
+      var $current = $results.children(activeClassSelector),
         $previous = $current.prev();
 
       if ($previous.length) {
-        $current.removeClass('omniselect-active');
-        $previous.addClass('omniselect-active');
+        $current.removeClass(options.activeClass);
+        $previous.addClass(options.activeClass);
       }
 
     };
 
     var next = function() {
-      var $current = $results.children('.omniselect-active'),
+      var $current = $results.children(activeClassSelector),
         $next = $current.next();
 
       if ($next.length) {
-        $current.removeClass('omniselect-active'),
-        $next.addClass('omniselect-active');
+        $current.removeClass(options.activeClass),
+        $next.addClass(options.activeClass);
       }
 
     };
@@ -122,13 +117,13 @@
         $results.append(item);
       }
 
-      $results.children(':first').addClass('omniselect-active');
+      $results.children(':first').addClass(options.activeClass);
 
       return show();
     };
 
-    var renderItem = function(label, id, index) {
-      var $item = $(options.item).append(label);
+    var renderItem = options.renderItem || function(label, id, index) {
+      var $item = $('<li></li>').append(label);
       if (id !== undefined) {
         $item.attr('data-omniselect-id', id);
       }
@@ -156,8 +151,8 @@
     };
 
     var select = function() {
-      var $selected = $results.children('.omniselect-active'),
-        id, value;
+      var $selected = $results.children(activeClassSelector);
+      var id, value;
 
       if ($selected.data('omniselect-add')) {
         fire('omniselect:add', $input.val());
@@ -221,8 +216,8 @@
 
     var mouseenter = function(e) {
       mouseover = true;
-      $results.find('.omniselect-active').removeClass('omniselect-active');
-      $(e.currentTarget).addClass('omniselect-active');
+      $results.children(activeClassSelector).removeClass(options.activeClass);
+      $(e.currentTarget).addClass(options.activeClass);
     };
 
     var mouseleave = function(e) {
