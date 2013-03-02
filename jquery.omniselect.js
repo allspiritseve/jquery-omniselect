@@ -130,7 +130,7 @@
       return $item;
     };
 
-    var filter = function(item, query) {
+    var filter = options.filter || function(item, query) {
       return item.match(new RegExp(query, 'i'));
     };
 
@@ -138,15 +138,15 @@
       return undefined;
     };
 
-    var itemLabel = function(item) {
+    var itemLabel = options.itemLabel || function(item) {
       return item;
     };
 
-    var itemValue = function(item) {
+    var itemValue = options.itemValue || function(item) {
       return item;
     }
 
-    var addLabel = function(query) {
+    var addLabel = options.addLabel || function(query) {
       return "Add '" + query + "'";
     };
 
