@@ -80,10 +80,10 @@ $(document).ready(function() {
   $addArtist.omniselect({
     source: artists,
     allowAdd: true,
-    id: function(artist) {
+    itemId: function(artist) {
       return artist.get('id');
     },
-    label: function(artist) {
+    itemLabel: function(artist) {
       return artist.get('name');
     },
     filter: function(artist, query) {

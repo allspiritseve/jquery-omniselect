@@ -16,13 +16,17 @@
       }
     </style>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="jquery.omniselect.js"></script>
+    <script src="../../jquery.omniselect.js"></script>
     <script type="text/javascript">
       $(document).ready(function() {
         var $searchBox = $('.search-box');
 
         $searchBox.omniselect({
-          source: ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Dakota","North Carolina","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]
+          source: ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Dakota","North Carolina","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"],
+          allowAdd: true,
+          renderAddItem: function(query) {
+            return '<li><strong>' + query + '*</strong></li>';
+          }
         });
         
         $searchBox.on('omniselect:select', function(event, value) {
@@ -30,7 +34,7 @@
         });
 
         $searchBox.on('omniselect:add', function(event, value) {
-          console.log('Added: ' + value);
+          console.log('New state: ' + value);
         });
       });
     </script>

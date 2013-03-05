@@ -15,7 +15,7 @@
     var plugin = {},
       $input = $(spec.input),
       options = $.extend({}, defaults, spec.options),
-      $results = $('<ul></ul>').addClass(options.resultsClass),
+      $results = $('<ol></ol>').addClass(options.resultsClass),
       activeClassSelector = '.' + options.activeClass.split(' ').join('.'),
       focused, visible, mouseover, suppressKeyPressRepeat;
 
@@ -93,7 +93,8 @@
 
     var render = function() {
       var query = $input.val(),
-        items = $.isFunction(options.source) ? options.source(query) : options.source;
+        items = $.isFunction(options.source) ? options.source(query) : options.source,
+        id, item, $item;
 
       if (!query || query.length < 1) {
         return visible ? hide() : plugin;
@@ -107,14 +108,19 @@
         })
         .slice(0, options.numResults - 1)
         .forEach(function(item, index) {
-          var item = renderItem(itemLabel(item), itemId(item), index);
-          $results.append(item);
+          id = itemId(item);
+          item = renderItem(itemLabel(item), id, index);
+          $item = item.jquery ? item : $(item);
+          if (id) {
+            $item.attr('data-omniselect-id', id);
+          }
+          $results.append($item);
         });
 
       if (options.allowAdd) {
-        var item = renderItem(addLabel(query));
-        item.attr('data-omniselect-add', true);
-        $results.append(item);
+        var $item = $(renderAddItem(query));
+        $item.data('omniselect-add', true);
+        $results.append($item);
       }
 
       $results.children(':first').addClass(options.activeClass);
@@ -123,18 +129,18 @@
     };
 
     var renderItem = options.renderItem || function(label, id, index) {
-      var $item = $('<li></li>').append(label);
-      if (id !== undefined) {
-        $item.attr('data-omniselect-id', id);
-      }
-      return $item;
+      return '<li>' + label + '</li>';
+    };
+
+    var renderAddItem = options.renderAddItem || function(query) {
+      return '<li>Add \'' + query + '\'</li>';
     };
 
     var filter = options.filter || function(item, query) {
       return item.match(new RegExp(query, 'i'));
     };
 
-    var itemId = function(item) {
+    var itemId = options.itemId || function(item) {
       return undefined;
     };
 
@@ -145,10 +151,6 @@
     var itemValue = options.itemValue || function(item) {
       return item;
     }
-
-    var addLabel = options.addLabel || function(query) {
-      return "Add '" + query + "'";
-    };
 
     var select = function() {
       var $selected = $results.children(activeClassSelector);
