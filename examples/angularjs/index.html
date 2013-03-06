@@ -29,11 +29,12 @@
 
       app.directive('omniselect', function () {
         return {
-          restrict: 'A',
+          restrict: 'E',
           replace: true,
           scope: {
             options: '='
           },
+          template: '<input type="text" />',
           link: function (scope, element, attrs) {
             element.omniselect({
               source: scope.options
@@ -52,7 +53,7 @@
   <body ng-app="omniselectApp">
     <h1>Omniselect with Angular</h1>
     <div ng-controller="MainCtrl" class="well">
-      <input omniselect="true" placeholder="Search here..." options="states" />
+      <omniselect placeholder="Search here..." options="states" />
     </div>
   </body>
 </html>
