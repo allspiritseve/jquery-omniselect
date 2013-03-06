@@ -15,7 +15,9 @@
         color: #fff;
       }
     </style>
+    <link rel="stylesheet" href="css/bootstrap.css">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
     <script src="../../jquery.omniselect.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular.min.js"></script>
     <script type="text/javascript">
@@ -49,7 +51,7 @@
   </head>
   <body ng-app="omniselectApp">
     <h1>Omniselect with Angular</h1>
-    <div ng-controller="MainCtrl">
+    <div ng-controller="MainCtrl" class="well">
       <input omniselect="true" placeholder="Search here..." options="states" />
     </div>
   </body>
