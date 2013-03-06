@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Omniselect with AngularJS</title>
+    <style type="text/css">
+      .omniselect-results {
+        cursor: pointer;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        width: 200px;
+      }
+      .omniselect-active {
+        background-color: #69c;
+        color: #fff;
+      }
+    </style>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="../../jquery.omniselect.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular.min.js"></script>
+    <script type="text/javascript">
+      var app = angular.module('omniselectApp', []);
+      
+      app.controller('MainCtrl', function ($scope) {
+        $scope.states = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Dakota","North Carolina","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"];
+      });
+
+      app.directive('omniselect', function () {
+        return {
+          restrict: 'A',
+          replace: true,
+          scope: {
+            options: '='
+          },
+          link: function (scope, element, attrs) {
+            element.omniselect({
+              source: scope.options
+            });
+            element.on('omniselect:select', function(event, value) {
+              console.log('Selected: ' + value);
+            });
+            element.on('omniselect:add', function(event, value) {
+              console.log('Added: ' + value);
+            });
+          }
+        }
+      });
+    </script>
+  </head>
+  <body ng-app="omniselectApp">
+    <h1>Omniselect with Angular</h1>
+    <div ng-controller="MainCtrl">
+      <input omniselect="true" placeholder="Search here..." options="states" />
+    </div>
+  </body>
+</html>
