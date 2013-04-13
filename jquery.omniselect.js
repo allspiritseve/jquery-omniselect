@@ -3,7 +3,7 @@
   "use strict";
 
   var omniselect = function(spec) {
-    
+
     var defaults = {
       source: [],
       resultsClass: 'omniselect-results',
@@ -25,6 +25,8 @@
       $input.on('keypress.omniselect', keypress);
       $input.on('keyup.omniselect', keyup);
       $input.on('keydown.omniselect', keydown);
+      $input.on('cut.omniselect', cut);
+      $input.on('paste.omniselect', paste);
 
       $results.on('click.omniselect', click);
       $results.on('mouseenter.omniselect', 'li', mouseenter);
@@ -226,6 +228,18 @@
       mouseover = false;
       if (!focused && visible) hide();
     };
+
+    var cut = function(e) {
+      setTimeout( function() {
+        if (visible && $input.val() == '') hide();
+      }, 0 );
+    }
+
+    var paste = function(e) {
+      setTimeout( function() {
+        if (!visible && $input.val() != '') render();
+      }, 0 );
+    }
 
     var fire = function(name, data) {
       var event = $.Event(name);
