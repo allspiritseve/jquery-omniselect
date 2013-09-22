@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Omniselect with Twitter Bootstrap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="../../omniselect.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        var $input = $('#states');
+
+        $input.omniselect2({
+          source: function(query, results) {
+            results(["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Dakota","North Carolina","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]);
+          },
+          filter: function(item, query) {
+            return item.match(query);
+          },
+          resultsClass: 'typeahead dropdown-menu',
+          activeClass: 'active',
+          renderItem: function(label, id, index) {
+            return '<li><a href="#">' + label + '</a></li>';
+          }
+        });
+        
+        $input.on('omniselect:select', function(event, item) {
+          $input.val(item).focus();
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div class="navbar navbar-static-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a href="#" class="brand">Omniselect</a>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <h1>jQuery Omniselect with Twitter Boostrap</h1>
+      <h2>Drop in replacement for Typeahead</h2>
+      <div class="dropdown">
+        <input type="text" name="search" class="span3" id="states" style="margin: 0" placeholder="Search here..." />
+      </div>
+    </div>
+  </body>
+</html>
