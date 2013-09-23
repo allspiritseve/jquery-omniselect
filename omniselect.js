@@ -3,10 +3,9 @@
   "use strict";
 
   var omniselect = function(spec) {
-    var plugin = {}
+    var plugin = {};
     
     var defaults = {
-      show: 'focus',
       cycle: false,
       source: [],
       resultsClass: 'omniselect-results',
@@ -36,32 +35,34 @@
 
     plugin.focus = function() {
       focused = true;
+      $input.on('keyup.omniselect', plugin.keyup)
+        .on('keydown.omniselect', plugin.keydown);
+      $results.on('click.omniselect', plugin.click)
+        .on('mouseenter.omniselect', 'li', plugin.mouseenter)
+        .on('mouseleave.omniselect', 'li', plugin.mouseleave);
+      return plugin;
     };
 
     plugin.blur = function() {
       focused = false;
-      if (!mouseover && visible) {
-        plugin.hide();
-      }
+      $input.off('keydown.omniselect')
+        .off('keyup.omniselect');
+      $results.off('click.omniselect')
+        .off('mouseenter.omniselect', 'li')
+        .off('mouseleave.omniselect', 'li');
+      return plugin;
     };
 
     plugin.show = function() {
-      $input.on('keyup.omniselect', plugin.keyup)
-        .on('keydown.omniselect', plugin.keydown);
-      $results.insertAfter($input).show()
-        .on('click.omniselect', plugin.click)
-        .on('mouseenter.omniselect', 'li', plugin.mouseenter)
-        .on('mouseleave.omniselect', 'li', plugin.mouseleave);
+      visible = true;
+      $results.insertAfter($input).show();
+      return plugin;
     };
 
     plugin.hide = function() {
       visible = false;
-      $input.off('keydown.omniselect')
-        .off('keyup.omniselect');
       $results.hide()
-        .off('click.omniselect')
-        .off('mouseenter.omniselect', 'li')
-        .off('mouseleave.omniselect', 'li');
+      return plugin;
     };
 
     plugin.search = function(query) {
@@ -81,6 +82,8 @@
       }
 
       plugin.renderItems(items);
+
+      plugin.setCurrentItemIndex(0);
 
       results = items;
 
@@ -131,8 +134,8 @@
 
     plugin.mouseenter = function(e) {
       mouseover = true;
-      var id = $(e.currentTarget).data('omniselect-id')
-      plugin.focusItem(id);
+      var index = $(e.currentTarget).data('omniselect-index')
+      plugin.setCurrentItemIndex(index);
     };
 
     plugin.mouseleave = function(e) {
@@ -147,27 +150,18 @@
     }
 
     plugin.previous = function() {
-      console.log('Previous');
       if (currentItemIndex > 0) {
         plugin.setCurrentItemIndex(currentItemIndex - 1);
-      } else {
-        if (options.cycle) {
-          plugin.setCurrentItemIndex(results.length - 1);
-        } else {
-          // plugin.setCurrentItemIndex(0);
-        }
+      } else if (options.cycle) {
+        plugin.setCurrentItemIndex(results.length - 1);
       }
     }
 
     plugin.next = function() {
-      if (currentItemIndex < results.length) {
+      if (currentItemIndex < results.length - 1) {
         plugin.setCurrentItemIndex(currentItemIndex + 1);
-      } else {
-        if (options.cycle) {
-          plugin.setCurrentItemIndex(0);
-        } else {
-          // plugin.setCurrentItemIndex(results.length - 1);
-        }
+      } else if (options.cycle) {
+        plugin.setCurrentItemIndex(0);
       }
     }
 
@@ -239,19 +233,16 @@
       };
 
       var focus = function() {
-        console.log('Outer focus');
         dropdown.focus();
         $input.on('keyup.omniselect', keyup);
       };
 
       var blur = function() {
-        console.log('Outer blur');
-        dropdown.blur();
+        dropdown.blur().hide();
         $input.off('keyup.omniselect')
       };
 
       var keyup = function(e) {
-        console.log('Outer keyup');
         var query = $input.val();
         if (query != lastQuery) {
           dropdown.search(query);
