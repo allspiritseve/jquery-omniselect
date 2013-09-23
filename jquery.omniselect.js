@@ -1,230 +1,222 @@
-(function($) {
-
-  "use strict";
-
+!function($, window) {
   var omniselect = function(spec) {
+    var plugin = {};
     
     var defaults = {
+      cycle: false,
       source: [],
       resultsClass: 'omniselect-results',
       activeClass: 'omniselect-active',
-      numResults: 10,
-      allowAdd: false
+      searchDelay: 300,
+      numResults: 5
     };
 
-    var plugin = {},
-      $input = $(spec.input),
-      options = $.extend({}, defaults, spec.options),
-      $results = $('<ol></ol>').addClass(options.resultsClass),
-      activeClassSelector = '.' + options.activeClass.split(' ').join('.'),
-      focused, visible, mouseover, suppressKeyPressRepeat;
-
-    var listen = function() {
-      $input.on('focus.omniselect', focus);
-      $input.on('blur.omniselect', blur);
-      $input.on('keypress.omniselect', keypress);
-      $input.on('keyup.omniselect', keyup);
-      $input.on('keydown.omniselect', keydown);
-
-      $results.on('click.omniselect', click);
-      $results.on('mouseenter.omniselect', 'li', mouseenter);
-      $results.on('mouseleave.omniselect', 'li', mouseleave);
-    };
-
-    var show = function() {
-      $results.insertAfter($input).show();
-      visible = true;
-      return plugin;
-    };
-
-    var hide = function() {
-      $results.hide();
-      visible = false;
-      return plugin;
-    };
-
-    var move = function(e) {
-      if (!visible) return;
-
-      // Ignore tab, enter or escape
-      if (~$.inArray(e.keyCode, [9, 13, 27])) {
-        e.preventDefault();
-        return;
-      }
-
-      // Up arrow
-      if (e.keyCode == 38) {
-        e.preventDefault();
-        previous();
-        return;
-      }
-
-      // Down arrow
-      if (e.keyCode == 40) {
-        e.preventDefault();
-        next();
-        return;
-      }
-
-      e.stopPropagation();
-    };
-
-    var previous = function() {
-      var $current = $results.children(activeClassSelector),
-        $previous = $current.prev();
-
-      if ($previous.length) {
-        $current.removeClass(options.activeClass);
-        $previous.addClass(options.activeClass);
-      }
-
-    };
-
-    var next = function() {
-      var $current = $results.children(activeClassSelector),
-        $next = $current.next();
-
-      if ($next.length) {
-        $current.removeClass(options.activeClass),
-        $next.addClass(options.activeClass);
-      }
-
-    };
-
-    var render = function() {
-      var query = $input.val(),
-        items = $.isFunction(options.source) ? options.source(query) : options.source,
-        id, item, $item;
-
-      if (!query || query.length < 1) {
-        return visible ? hide() : plugin;
-      }
-
-      $results.empty();
-
-      items
-        .filter(function(item) {
-          return filter(item, query);
-        })
-        .slice(0, options.numResults - 1)
-        .forEach(function(item, index) {
-          id = itemId(item);
-          item = renderItem(itemLabel(item), id, index);
-          $item = item.jquery ? item : $(item);
-          if (id) {
-            $item.attr('data-omniselect-id', id);
-          }
-          $results.append($item);
-        });
-
-      if (options.allowAdd) {
-        var $item = $(renderAddItem(query));
-        $item.data('omniselect-add', true);
-        $results.append($item);
-      }
-
-      $results.children(':first').addClass(options.activeClass);
-
-      return show();
-    };
-
-    var renderItem = options.renderItem || function(label, id, index) {
-      return '<li>' + label + '</li>';
-    };
-
-    var renderAddItem = options.renderAddItem || function(query) {
-      return '<li>Add \'' + query + '\'</li>';
-    };
-
-    var filter = options.filter || function(item, query) {
-      return item.match(new RegExp(query, 'i'));
-    };
-
-    var itemId = options.itemId || function(item) {
-      return undefined;
-    };
-
-    var itemLabel = options.itemLabel || function(item) {
-      return item;
-    };
-
-    var itemValue = options.itemValue || function(item) {
-      return item;
+    var keys = {
+      tab: 9,
+      enter: 13,
+      shift: 16,
+      control: 17,
+      alt: 18,
+      escape: 27,
+      up: 38,
+      down: 40
     }
 
-    var select = function() {
-      var $selected = $results.children(activeClassSelector);
-      var id, value;
+    var $input = $(spec.input),
+      options = $.extend({}, defaults, spec.options),
+      results = [], visible = false, focused, searching, mouseover,
+      $results = $('<ul></ul>', { class: options.resultsClass }),
+      currentItemIndex = 0, value, currentQuery,
+      activeClassSelector = '.' + options.activeClass.split(' ').join('.'),
+      suppressKeyPressRepeat;
 
-      if ($selected.data('omniselect-add')) {
-        fire('omniselect:add', $input.val());
-      } else {
-        id = $selected.data('omniselect-id') || $selected.text();
-        if (fire('omniselect:select', id)) {
-          $input.val(itemValue(id)).change();
-        }
-      }
-
-      return hide();
+    plugin.init = function() {
+      $input.on('focus.omniselect', plugin.focus).on('blur.omniselect', plugin.blur);
+      return plugin;
     };
 
-    var focus = function() {
+    plugin.focus = function() {
       focused = true;
+      $input.on('keyup.omniselect', plugin.keyup)
+        .on('keydown.omniselect', plugin.keydown);
+      $results.on('click.omniselect', plugin.click)
+        .on('mouseenter.omniselect', 'li', plugin.mouseenter)
+        .on('mouseleave.omniselect', 'li', plugin.mouseleave);
+      return plugin;
     };
 
-    var blur = function() {
+    plugin.blur = function() {
       focused = false;
-      if (!mouseover && visible) hide();
+      $input.off('keydown.omniselect')
+        .off('keyup.omniselect');
+      $results.off('click.omniselect')
+        .off('mouseenter.omniselect', 'li')
+        .off('mouseleave.omniselect', 'li');
+      return plugin;
     };
 
-    var keydown = function(e) {
-      suppressKeyPressRepeat = ~$.inArray(e.keyCode, [40,38,9,13,27])
-      move(e);
+    plugin.show = function() {
+      visible = true;
+      $results.insertAfter($input).show();
+      return plugin;
     };
 
-    var keypress = function(e) {
-      if (suppressKeyPressRepeat) return;
-      move(e);
+    plugin.hide = function() {
+      visible = false;
+      $results.hide()
+      return plugin;
     };
 
-    var keyup = function(e) {
-      // Ignore shift, ctrl, alt, up arrow or down arrow
-      if (~$.inArray(e.keyCode, [16, 17, 18, 38, 40])) return;
+    plugin.search = function(query) {
+      console.log('Search', query);
+      if (searching) { clearTimeout(searching) };
+      searching = setTimeout(function() { search(query) }, options.searchDelay);
+    }
 
-      // Select item if tab or enter
-      if (~$.inArray(e.keyCode, [9, 13])) {
-        if (visible) select();
-        return;
+    plugin.results = function(items) {
+      if ($.isFunction(options.filter)) {
+        items = items.filter(function(item) {
+          return options.filter(item, currentQuery);
+        });
       }
 
-      // Hide if escape
-      if (e.keyCode == 27) {
-        if (visible) hide();
-        return;
+      if (options.numResults) {
+        items = items.slice(0, options.numResults - 1);
       }
 
-      render();
+      plugin.renderItems(items);
 
-      e.stopPropagation();
-      e.preventDefault();
+      plugin.setCurrentItemIndex(0);
+
+      results = items;
+
+      plugin.show();
     };
 
-    var click = function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      select();
-      $input.focus();
+    plugin.renderItems = function(items) {
+      $results.html(items.map(plugin.renderItem));
     };
 
-    var mouseenter = function(e) {
+    plugin.renderItem = function(item, index) {
+      return '<li class="' + itemClass(item, index) + '" data-omniselect-index="' + index + '"><a>' + itemLabel(item, index) + '</a></li>';
+    };
+
+    plugin.keydown = function(e) {
+      switch(e.keyCode) {
+        case keys.tab:
+        case keys.enter:
+        case keys.escape:
+          e.preventDefault();
+          return;
+      }
+    };
+
+      var keyup = function(e) {
+        var query = $input.val();
+        if (query != lastQuery) {
+          console.log('New query', query);
+          dropdown.search(query);
+          lastQuery = query;
+        }
+      };
+
+    plugin.keyup = function(e) {
+      switch (e.keyCode) {
+        case keys.shift:
+        case keys.control:
+        case keys.alt:
+          return;
+        case keys.up:
+          return plugin.previous();
+        case keys.down:
+          return plugin.next();
+        case keys.tab:
+        case keys.enter:
+          if (visible) { plugin.select() }
+          return;
+        case keys.escape:
+          if (visible) { plugin.hide() }
+          return;
+      }
+      plugin.search($input.val());
+    };
+
+    plugin.click = function() {
+      plugin.select();
+      return false;
+    };
+
+    plugin.mouseenter = function(e) {
       mouseover = true;
-      $results.children(activeClassSelector).removeClass(options.activeClass);
-      $(e.currentTarget).addClass(options.activeClass);
+      var index = $(e.currentTarget).data('omniselect-index')
+      plugin.setCurrentItemIndex(index);
     };
 
-    var mouseleave = function(e) {
+    plugin.mouseleave = function(e) {
       mouseover = false;
-      if (!focused && visible) hide();
+      if (focused && visible) { plugin.hide() }
+    }
+
+    plugin.setCurrentItemIndex = function(index) {
+      $results.children('[data-omniselect-index="' + currentItemIndex + '"]').removeClass(options.activeClass);
+      currentItemIndex = index;
+      $results.children('[data-omniselect-index="' + index + '"]').addClass(options.activeClass);
+    }
+
+    plugin.previous = function() {
+      if (currentItemIndex > 0) {
+        plugin.setCurrentItemIndex(currentItemIndex - 1);
+      } else if (options.cycle) {
+        plugin.setCurrentItemIndex(results.length - 1);
+      }
+    }
+
+    plugin.next = function() {
+      if (currentItemIndex < results.length - 1) {
+        plugin.setCurrentItemIndex(currentItemIndex + 1);
+      } else if (options.cycle) {
+        plugin.setCurrentItemIndex(0);
+      }
+    }
+
+    plugin.currentItem = function() {
+      return results[currentItemIndex];
+    };
+
+    plugin.select = function() {
+      fire('omniselect:select', plugin.currentItem());
+      plugin.hide();
+    }
+
+    var findItemIndex = function(id) {
+      var itemIndex;
+      results.forEach(function(item, index) {
+        if (itemId(item, index) == id) {
+          itemIndex = index;
+        }
+      });
+      return itemIndex;
+    }
+
+    var itemClass = function(item, index) {
+      return index === currentItemIndex ? options.activeClass : ''
+    };
+
+    var itemId = function(item, index) {
+      return item;
+    };
+
+    var itemLabel = function(item, index) {
+      return item;
+    };
+
+    var search = function(query) {
+      currentQuery = query;
+      if ($.isFunction(options.source)) {
+        options.source(query, plugin.results);
+      } else {
+        plugin.results(options.source)
+      }
     };
 
     var fire = function(name, data) {
@@ -233,13 +225,14 @@
       return event.result !== false;
     };
 
-    listen();
+    return plugin.init();
   };
+  window.omniselect = omniselect;
 
   $.fn.omniselect = function(options) {
     return this.each(function() {
       omniselect({ input: this, options: options });
     });
-  }
+  };
 
-})(jQuery);
+}(jQuery, window);
